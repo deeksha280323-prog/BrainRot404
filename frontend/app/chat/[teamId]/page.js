@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, useParams } from "next/navigation";
 import { getTeamById } from "../../../lib/api";
-import { io } from "socket.io-client";
+import { supabase } from "../../../lib/supabase";
 import { Playfair_Display } from "next/font/google";
 
 const playfair = Playfair_Display({ subsets: ["latin"] });
@@ -27,34 +27,61 @@ export default function ChatPage() {
     const token = localStorage.getItem("devmatch_token");
     if (!token) { router.push("/login"); return; }
 
-    // Fetch team info
     getTeamById(teamId)
       .then((res) => setTeam(res.data))
       .catch(() => router.push("/teams"))
       .finally(() => setLoading(false));
 
-    // Socket connection
-    const newSocket = io("http://localhost:5000");
-    setSocket(newSocket);
-
-    newSocket.on("connect", () => {
-      newSocket.emit("join_team_room", teamId);
-    });
-
-    newSocket.on("receive_message", (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
-
-    newSocket.on("user_typing", (data) => {
-      if (data.isTyping) {
-        setTyping((prev) => [...new Set([...prev, data.userId])]);
-      } else {
-        setTyping((prev) => prev.filter((id) => id !== data.userId));
+    // Load historic messages
+    const fetchHistory = async () => {
+      const { data } = await supabase.from('messages').select('*, profiles(name)').eq('team_id', teamId).order('created_at', { ascending: true });
+      if (data) {
+        setMessages(data.map(m => ({
+          sender: m.sender_id,
+          senderName: m.profiles?.name || 'Operative',
+          content: m.content,
+          timestamp: m.created_at
+        })));
       }
-    });
+    };
+    fetchHistory();
+
+    // Supabase Channel Setup
+    const channel = supabase.channel(`team_${teamId}`);
+
+    channel
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `team_id=eq.${teamId}` }, async (payload) => {
+        const newMsg = payload.new;
+        if (newMsg.sender_id !== currentUser._id) {
+          const { data: profile } = await supabase.from('profiles').select('name').eq('id', newMsg.sender_id).single();
+          setMessages((prev) => [...prev, {
+            sender: newMsg.sender_id,
+            senderName: profile?.name || "Operative",
+            content: newMsg.content,
+            timestamp: newMsg.created_at
+          }]);
+        }
+      })
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const typingUsers = [];
+        for (const key in state) {
+          if (state[key][0]?.isTyping && state[key][0]?.userId !== currentUser._id) {
+            typingUsers.push(state[key][0].userId);
+          }
+        }
+        setTyping(typingUsers);
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ userId: currentUser._id, isTyping: false });
+        }
+      });
+
+    setSocket(channel);
 
     return () => {
-      newSocket.disconnect();
+      supabase.removeChannel(channel);
     };
   }, [teamId, router]);
 
@@ -62,30 +89,33 @@ export default function ChatPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = (e) => {
+  const sendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !socket) return;
 
-    const msgData = {
-      teamId,
-      sender: currentUser._id,
-      senderName: currentUser.name,
-      content: newMessage,
-      timestamp: new Date().toISOString(),
-    };
-
-    socket.emit("send_message", msgData);
-    setMessages((prev) => [...prev, msgData]);
+    const msgContent = newMessage;
     setNewMessage("");
 
-    // Stop typing indicator
-    socket.emit("typing", { teamId, userId: currentUser._id, isTyping: false });
+    if (socket) await socket.track({ userId: currentUser._id, isTyping: false });
+
+    const { data: dbMsg } = await supabase.from('messages').insert({
+       team_id: teamId,
+       sender_id: currentUser._id,
+       content: msgContent
+    }).select().single();
+
+    setMessages((prev) => [...prev, {
+       sender: currentUser._id,
+       senderName: currentUser.name,
+       content: msgContent,
+       timestamp: dbMsg?.created_at || new Date().toISOString()
+    }]);
   };
 
   const handleTyping = (e) => {
     setNewMessage(e.target.value);
     if (socket) {
-      socket.emit("typing", { teamId, userId: currentUser._id, isTyping: e.target.value.length > 0 });
+      socket.track({ userId: currentUser._id, isTyping: e.target.value.length > 0 });
     }
   };
 

@@ -51,9 +51,13 @@ export default function OnboardingPage() {
     setSubmitting(true);
     try {
       await updateProfile({ ...formData, onboardingCompleted: true });
-      router.push("/dashboard");
+      setStep(5);
+      setTimeout(() => {
+        router.push("/dashboard");
+      }, 2500);
     } catch (err) {
-      alert("Failed to save profiling data");
+      console.error(err);
+      alert("Failed to save profiling data: " + (err?.response?.data?.message || err?.message || JSON.stringify(err)));
     } finally {
       setSubmitting(false);
     }
@@ -310,32 +314,51 @@ export default function OnboardingPage() {
                 </div>
               </div>
             )}
+            {/* STEP 5: Success */}
+            {step === 5 && (
+              <div className="flex flex-col items-center justify-center py-12 text-center space-y-6">
+                 <motion.div 
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}
+                    className="w-24 h-24 bg-emerald-50 text-emerald-500 rounded-[2rem] flex items-center justify-center shadow-xl shadow-emerald-500/20"
+                 >
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                 </motion.div>
+                 <div>
+                   <h2 className={`${playfair.className} text-4xl font-bold text-[#222] mb-3`}>Neural Link Established</h2>
+                   <p className="text-gray-400 text-sm font-medium">Your vectors have been successfully configured.<br/>Initializing dashboard...</p>
+                 </div>
+              </div>
+            )}
           </motion.div>
         </AnimatePresence>
 
         {/* Footer Actions */}
-        <div className="p-8 bg-[#fefcfb] border-t border-[#f0e6e4]/40 flex justify-between items-center">
-          <button
-            onClick={handlePrev}
-            className={`text-xs font-bold text-gray-300 hover:text-[#f9ae9b] uppercase tracking-widest transition-colors ${step === 1 ? 'invisible' : ''}`}
-          >
-            ← Previous
-          </button>
-          
-          {step < 4 ? (
-            <button onClick={handleNext} className="btn-primary !py-3 !px-10 text-sm shadow-xl shadow-[#f9ae9b]/25">
-              Next Step
-            </button>
-          ) : (
-            <button 
-              onClick={submitOnboarding}
-              disabled={submitting} 
-              className="btn-primary !py-3 !px-10 text-sm shadow-xl shadow-[#f9ae9b]/35 disabled:opacity-50"
+        {step < 5 && (
+          <div className="p-8 bg-[#fefcfb] border-t border-[#f0e6e4]/40 flex justify-between items-center">
+            <button
+              onClick={handlePrev}
+              className={`text-xs font-bold text-gray-300 hover:text-[#f9ae9b] uppercase tracking-widest transition-colors ${step === 1 ? 'invisible' : ''}`}
             >
-              {submitting ? "Processing..." : "Complete Profile 🚀"}
+              ← Previous
             </button>
-          )}
-        </div>
+            
+            {step < 4 ? (
+              <button onClick={handleNext} className="btn-primary !py-3 !px-10 text-sm shadow-xl shadow-[#f9ae9b]/25">
+                Next Step
+              </button>
+            ) : (
+              <button 
+                onClick={submitOnboarding}
+                disabled={submitting} 
+                className="btn-primary !py-3 !px-10 text-sm shadow-xl shadow-[#f9ae9b]/35 disabled:opacity-50"
+              >
+                {submitting ? "Processing..." : "Complete Profile 🚀"}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

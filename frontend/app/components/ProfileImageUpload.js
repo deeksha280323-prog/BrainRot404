@@ -40,7 +40,7 @@ export default function ProfileImageUpload({ initialImage, onUploadSuccess }) {
       <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl bg-gray-50 group">
         {preview || image ? (
           <img 
-            src={preview || (image?.startsWith('http') ? image : `http://localhost:5000${image}`)} 
+            src={preview || image} 
             alt="Profile" 
             className="w-full h-full object-cover"
           />

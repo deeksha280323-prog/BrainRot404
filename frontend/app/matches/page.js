@@ -157,7 +157,7 @@ export default function MatchesPage() {
                 <div className="flex items-center gap-6 mb-10 mt-2">
                   <div className="w-20 h-20 rounded-[1.75rem] bg-gradient-secondary flex items-center justify-center text-[#f9ae9b] font-bold text-3xl shrink-0 shadow-lg border-2 border-white group-hover:scale-105 transition-transform">
                     {user?.profilePicture ? (
-                      <img src={`http://localhost:5000${user.profilePicture}`} className="w-full h-full object-cover" alt="" />
+                      <img src={user.profilePicture} className="w-full h-full object-cover" alt="" />
                     ) : (
                       user?.name?.charAt(0)
                     )}

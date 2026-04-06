@@ -8,6 +8,21 @@ import { useRightPanel } from "../contexts/RightPanelContext";
 
 const playfair = Playfair_Display({ subsets: ["latin"] });
 
+const MOCK_CARDS = [
+  {
+    user: { _id: "demo1", name: "Aisha Sharma", campus: { college: "Thapar Institute" }, state: "Punjab", skills: [{name: "React"}, {name: "Next.js"}, {name: "Tailwind"}], profilePicture: "" },
+    matchScore: 98
+  },
+  {
+    user: { _id: "demo2", name: "Alex Rivera", campus: { college: "Stanford University" }, state: "CA", skills: [{name: "Figma"}, {name: "UI/UX"}, {name: "React"}], profilePicture: "" },
+    matchScore: 92
+  },
+  {
+    user: { _id: "demo3", name: "Rishi Singh", campus: { college: "PEC" }, state: "Chandigarh", skills: [{name: "Rust"}, {name: "Python"}, {name: "NLP"}], profilePicture: "" },
+    matchScore: 89
+  }
+];
+
 function SwipeCard({ match, onSwipe }) {
   const x = useMotionValue(0);
   const rotate = useTransform(x, [-200, 200], [-10, 10]);
@@ -50,7 +65,7 @@ function SwipeCard({ match, onSwipe }) {
         <div className="absolute inset-0 opacity-30 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
         <div className="absolute top-10 left-10 w-24 h-24 rounded-[1.75rem] bg-gradient-secondary flex items-center justify-center text-[#f9ae9b] font-bold text-3xl border-4 border-white shadow-2xl overflow-hidden group">
           {user?.profilePicture ? (
-            <img src={`http://localhost:5000${user.profilePicture}`} alt={user?.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+            <img src={user.profilePicture} alt={user?.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
           ) : (
             user?.name?.charAt(0)
           )}
@@ -133,7 +148,7 @@ function ProfileGrid({ items, title, emptyIcon, emptyMessage, onSelect }) {
               <div className="h-28 bg-gradient-to-br from-[#fff2ee] to-[#fff8f5] flex items-center px-8 shrink-0">
                 <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-[#f9ae9b] font-black text-xl shadow-lg border border-[#f9ae9b]/10 overflow-hidden">
                   {item.user.profilePicture ? (
-                    <img src={`http://localhost:5000${item.user.profilePicture}`} alt="" className="w-full h-full object-cover" />
+                    <img src={item.user.profilePicture} alt="" className="w-full h-full object-cover" />
                   ) : (
                     item.user.name.charAt(0)
                   )}
@@ -207,7 +222,9 @@ export default function DiscoverPage() {
       if (matches.length > 0 && currentIdx < matches.length) {
         setPanelData({ user: matches[currentIdx].user });
       } else {
-        setPanelData(null);
+        // Feed the Right Panel with the demo user data
+        const idx = currentIdx % MOCK_CARDS.length;
+        setPanelData({ user: MOCK_CARDS[idx].user });
       }
     }
   }, [matches, currentIdx, viewMode, setPanelData]);
@@ -226,8 +243,19 @@ export default function DiscoverPage() {
     </div>
   );
 
-  const remaining = matches.slice(currentIdx);
-  const allSwiped = remaining.length === 0;
+  let remaining = [];
+  let isDemoing = false;
+  
+  if (matches.length > 0 && currentIdx < matches.length) {
+      remaining = matches.slice(currentIdx);
+  } else {
+      // Infinite demo loop
+      const idx = currentIdx % MOCK_CARDS.length;
+      remaining = [...MOCK_CARDS.slice(idx), ...MOCK_CARDS.slice(0, idx)];
+      isDemoing = true;
+  }
+
+  const allSwiped = false; // Never empty now thanks to demo cards
   const noUserProfile = !me?.skills || me.skills.length === 0;
 
   return (
@@ -253,7 +281,7 @@ export default function DiscoverPage() {
                       {swipedLists.accepted.slice(0, 5).map((sync, i) => (
                         <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-[#f9ae9b] flex items-center justify-center text-white text-xs font-bold overflow-hidden shadow-md">
                            {sync.user.profilePicture ? (
-                             <img src={`http://localhost:5000${sync.user.profilePicture}`} className="w-full h-full object-cover" alt="" />
+                             <img src={sync.user.profilePicture} className="w-full h-full object-cover" alt="" />
                            ) : (
                              sync.user.name.charAt(0)
                            )}
@@ -343,6 +371,11 @@ export default function DiscoverPage() {
                    </div>
                  ) : (
                    <AnimatePresence>
+                     {isDemoing && (
+                       <div className="absolute -top-12 inset-x-0 mx-auto w-max px-4 py-1.5 bg-rose-50 border border-rose-100 rounded-xl z-50 text-[9px] font-black text-rose-500 uppercase tracking-widest shadow-sm">
+                         Test Mode: Infinite Demo Cards
+                       </div>
+                     )}
                      {remaining.slice(0, 3).reverse().map((match, i, arr) => {
                        const isTop = i === arr.length - 1;
                        return (

@@ -32,7 +32,7 @@ export default function RightPanel() {
           <div className="text-center">
             <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-br from-[#f9ae9b] to-[#fac2b4] flex items-center justify-center text-white font-bold text-3xl shadow-xl shadow-[#f9ae9b]/20 mb-4 border border-[#f9ae9b]/40 overflow-hidden">
               {user.profilePicture ? (
-                <img src={`http://localhost:5000${user.profilePicture}`} alt={user.name} className="w-full h-full object-cover" />
+                <img src={user.profilePicture} alt={user.name} className="w-full h-full object-cover" />
               ) : (
                 user.name?.charAt(0) || "?"
               )}
