@@ -104,9 +104,9 @@ export default function HackathonMode() {
     }
   };
 
-  const displayLeaderboard = leaderboard.length > 0 ? leaderboard : MOCK_LEADERBOARD;
-  const displayTeams = suggestedTeams.length > 0 ? suggestedTeams : MOCK_SQUADS;
-  const isMock = leaderboard.length === 0;
+  const isMock = totalParticipants === 0;
+  const displayLeaderboard = isMock ? MOCK_LEADERBOARD : leaderboard;
+  const displayTeams = isMock ? MOCK_SQUADS : suggestedTeams;
 
   return (
     <div className="min-h-screen bg-[var(--background)] p-6">
@@ -154,7 +154,7 @@ export default function HackathonMode() {
            </div>
            
            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4">
-              {displayLeaderboard.map((pair, idx) => (
+              {displayLeaderboard.length > 0 ? displayLeaderboard.map((pair, idx) => (
                 <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} transition={{delay: idx*0.05}} key={idx} className={`bg-white border border-[#f0e6e4]/60 p-5 rounded-2xl flex items-center justify-between transition-all group ${isMock ? 'opacity-70' : 'hover:border-[#f9ae9b]/40 hover:shadow-lg hover:shadow-[#f9ae9b]/5'}`}>
                    <div className="flex items-center gap-6">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${idx < 3 && !isMock ? 'bg-[#fcefec] text-[#f9ae9b] border border-[#f9ae9b]/20 shadow-inner' : 'bg-gray-50 text-gray-300 border border-gray-100'}`}>
@@ -183,7 +183,15 @@ export default function HackathonMode() {
                      </div>
                    </div>
                 </motion.div>
-              ))}
+              )) : (
+                <div className="h-full flex flex-col items-center justify-center text-gray-300">
+                  <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                     <span className="text-4xl opacity-30">📊</span>
+                  </div>
+                  <p className="text-sm font-medium">Matrix awaiting participant expansion</p>
+                  <p className="text-[10px] mt-1 font-medium italic">Requires at least 2 participants for synergy</p>
+                </div>
+              )}
            </div>
         </div>
 
@@ -196,7 +204,7 @@ export default function HackathonMode() {
            </div>
            
            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 grid grid-cols-1 gap-5">
-              {displayTeams.map((team, idx) => (
+              {displayTeams.length > 0 ? displayTeams.map((team, idx) => (
                 <motion.div initial={{opacity:0, scale:0.98}} animate={{opacity:1, scale:1}} transition={{delay: idx*0.1}} key={idx} className={`border p-6 rounded-2xl shadow-sm transition-shadow ${isMock ? 'bg-white border-gray-100 opacity-70' : 'bg-gradient-to-br from-[#fcefec] to-white border-[#f9ae9b]/15 hover:shadow-md'}`}>
                   <div className="flex justify-between items-center mb-5">
                     <h3 className={`${playfair.className} text-xl font-bold ${isMock ? 'text-gray-500' : 'text-[#222]'}`}>Squad Ensemble-{idx+1}</h3>
@@ -215,7 +223,15 @@ export default function HackathonMode() {
                     ))}
                   </div>
                 </motion.div>
-              ))}
+              )) : (
+                <div className="h-full flex flex-col items-center justify-center text-gray-300">
+                  <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                     <span className="text-4xl opacity-30">🤖</span>
+                  </div>
+                  <p className="text-sm font-medium">Pool expansion in progress...</p>
+                  <p className="text-[10px] mt-1 font-medium italic">Ensemble clustering requires 3+ participants</p>
+                </div>
+              )}
            </div>
         </div>
 
