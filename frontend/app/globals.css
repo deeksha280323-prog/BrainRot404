@@ -1,0 +1,199 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fefcfb;
+  --foreground: #333333;
+  --primary: #f9ae9b;
+  --primary-hover: #fac2b4;
+  --secondary: #e6cec8;
+  --dark-bg: #fffcf8;
+  --dark-card: #ffffff;
+  --dark-border: #f0e6e4;
+  --accent-text: #222222;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-dark-bg: var(--dark-bg);
+  --color-dark-card: var(--dark-card);
+  --color-dark-border: var(--dark-border);
+  --color-accent-text: var(--accent-text);
+  
+  /* Sane slate color definitions for light mode */
+  --color-slate-900: #111111;
+  --color-slate-800: #222222;
+  --color-slate-700: #444444;
+  --color-slate-500: #666666;
+  --color-slate-400: #888888;
+  --color-slate-300: #cccccc;
+  --color-slate-200: #eeeeee;
+  
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Outfit', system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Outfit', system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Glass morphism panels refined for light mode */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(249, 174, 155, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  color: #333;
+}
+
+.glass-card {
+  background: #ffffff;
+  border: 1px solid rgba(249, 174, 155, 0.2);
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 30px -10px rgba(249, 174, 155, 0.08);
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.linear-card {
+  background: #ffffff;
+  border: 1px solid rgba(249, 174, 155, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(249, 174, 155, 0.05);
+  transition: all 0.2s ease;
+  color: #333;
+}
+.linear-card:hover {
+  border-color: rgba(249, 174, 155, 0.4);
+  box-shadow: 0 12px 30px rgba(249, 174, 155, 0.1);
+}
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(135deg, #f9ae9b, #fa7e61);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bg-gradient-primary {
+  background: linear-gradient(135deg, #f9ae9b, #fa7e61);
+}
+
+.bg-gradient-hero {
+  background: linear-gradient(135deg, #fefcfb 0%, #fff8f5 50%, #fefcfb 100%);
+}
+
+/* Input styling refined for light mode */
+.input-light {
+  background: #fbfbfb;
+  border: 1px solid #eee;
+  color: #333;
+  border-radius: 0.85rem;
+  padding: 0.85rem 1.15rem;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.input-light:focus {
+  outline: none;
+  border-color: #f9ae9b;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(249, 174, 155, 0.1);
+}
+
+.input-light::placeholder {
+  color: #bbb;
+}
+
+/* Button base refined */
+.btn-primary {
+  background: linear-gradient(135deg, #f9ae9b, #fa7e61);
+  color: white;
+  font-weight: 600;
+  padding: 0.85rem 2.25rem;
+  border-radius: 0.85rem;
+  transition: all 0.25s ease;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(249, 174, 155, 0.35);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 35px rgba(249, 174, 155, 0.45);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: white;
+  color: #f9ae9b;
+  font-weight: 600;
+  padding: 0.85rem 2.25rem;
+  border-radius: 0.85rem;
+  transition: all 0.25s ease;
+  border: 1.5px solid #fde8e3;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background: #fffafa;
+  border-color: #f9ae9b;
+}
+
+/* Custom Scrollbar for Light Mode */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #fdfdfd;
+}
+::-webkit-scrollbar-thumb {
+  background: #e2e2e2;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d4d4d4;
+}
+
+/* Keyframes Refined */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(249, 174, 155, 0.15); }
+  50% { box-shadow: 0 0 40px rgba(249, 174, 155, 0.3); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* Skill tag colors for Light Mode */
+.skill-beginner { background: #f0fdf4; color: #16a34a; border: 1px solid #dcfce7; }
+.skill-intermediate { background: #eff6ff; color: #2563eb; border: 1px solid #dbeafe; }
+.skill-advanced { background: #faf5ff; color: #9333ea; border: 1px solid #f3e8ff; }
+.skill-expert { background: #fff7ed; color: #ea580c; border: 1px solid #ffedd5; }
