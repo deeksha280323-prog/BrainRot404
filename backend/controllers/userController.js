@@ -19,6 +19,9 @@ const updateUserProfile = async (req, res) => {
     user.campus = req.body.campus || user.campus;
     user.experienceLevel = req.body.experienceLevel || user.experienceLevel;
     user.skills = req.body.skills || user.skills;
+    user.state = req.body.state !== undefined ? req.body.state : user.state;
+    user.country = req.body.country !== undefined ? req.body.country : user.country;
+    user.profilePicture = req.body.profilePicture || user.profilePicture;
     user.onboardingCompleted = req.body.onboardingCompleted !== undefined ? req.body.onboardingCompleted : user.onboardingCompleted;
 
     const updatedUser = await user.save();

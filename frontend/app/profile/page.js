@@ -73,7 +73,11 @@ export default function ProfilePage() {
         <div className="flex-grow text-center md:text-left relative z-10">
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
             <div>
-              <h1 className={`${playfair.className} text-4xl font-bold text-[#222]`}>{user?.name}</h1>
+              {editing ? (
+                <input type="text" className="input-light text-2xl font-bold border-[#eee] mb-2 px-3 py-1 w-full" value={form.name || ""} onChange={(e) => setForm({...form, name: e.target.value})} />
+              ) : (
+                <h1 className={`${playfair.className} text-4xl font-bold text-[#222]`}>{user?.name}</h1>
+              )}
               <p className="text-xs font-bold text-[#f9ae9b] uppercase tracking-[0.2em] mt-2">{user?.experienceLevel?.overall || "Developer"} Vector</p>
               <p className="text-[14px] text-gray-400 font-medium mt-1">{user?.email}</p>
             </div>
@@ -86,11 +90,16 @@ export default function ProfilePage() {
           </div>
           
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-4">
-             {user?.campus?.college && (
+             {editing ? (
+               <div className="flex items-center gap-2">
+                 <span className="text-[#f9ae9b]">🎓</span>
+                 <input type="text" className="input-light text-xs px-3 py-1.5 w-48" placeholder="University Name" value={form.campus?.college || ""} onChange={(e) => setForm({...form, campus: { ...form.campus, college: e.target.value }})} />
+               </div>
+             ) : user?.campus?.college ? (
               <span className="px-5 py-2.5 bg-white border border-[#f0e6e4]/60 rounded-2xl text-[11px] font-bold text-gray-500 flex items-center gap-2 shadow-sm">
                 <span className="text-[#f9ae9b]">🎓</span> {user.campus.college}
               </span>
-             )}
+             ) : null}
              <span className="px-5 py-2.5 bg-white border border-[#f0e6e4]/60 rounded-2xl text-[11px] font-bold text-gray-500 flex items-center gap-2 shadow-sm">
                 <span className="text-[#f9ae9b]">📍</span> {user?.state || "Remote"}
              </span>
@@ -126,8 +135,22 @@ export default function ProfilePage() {
             </div>
 
             {editing && (
-              <div className="mt-8 pt-6 border-t border-[#f0e6e4]/50">
-                 <p className="text-[11px] font-bold text-gray-300 uppercase tracking-widest pl-2 italic">Neural stack is read-only during minor edits.</p>
+              <div className="mt-8 pt-6 border-t border-[#f0e6e4]/50 flex flex-wrap items-center gap-3">
+                 <input type="text" id="newSkillName" placeholder="New skill (e.g. Docker)" className="input-light text-xs py-2 px-3 w-40" />
+                 <select id="newSkillLevel" className="input-light text-xs py-2 px-3 w-32">
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                    <option value="Expert">Expert</option>
+                 </select>
+                 <button type="button" onClick={() => {
+                    const n = document.getElementById('newSkillName').value;
+                    const l = document.getElementById('newSkillLevel').value;
+                    if(n) {
+                      setForm({...form, skills: [...(form.skills||[]), {name: n, level: l}]});
+                      document.getElementById('newSkillName').value = '';
+                    }
+                 }} className="btn-secondary !py-2 !px-4 text-[10px] font-bold uppercase tracking-widest shadow-sm">Add Node</button>
               </div>
             )}
           </div>
