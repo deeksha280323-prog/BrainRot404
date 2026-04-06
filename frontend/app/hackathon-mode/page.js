@@ -2,8 +2,22 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { joinHackathon, getHackathonMatches, getSuggestedTeams, demoCompare } from "../../lib/api";
+import { Playfair_Display } from "next/font/google";
+
+const playfair = Playfair_Display({ subsets: ["latin"] });
 
 const MOCK_SKILLS = ["React", "Python", "Node.js", "MongoDB", "Figma", "AWS"];
+
+const MOCK_LEADERBOARD = [
+  { user1: { _id: "m1", name: "Aisha Sharma", skills: [1,2,3] }, user2: { _id: "m2", name: "Alex Rivera", skills: [1,2,3] }, score: 98 },
+  { user1: { _id: "m3", name: "Rishi Singh", skills: [1,2] }, user2: { _id: "m4", name: "Sarah Chen", skills: [1,2] }, score: 95 },
+  { user1: { _id: "m5", name: "Rahul Verma", skills: [1,2,3,4] }, user2: { _id: "m6", name: "Priya Patel", skills: [1,2,3] }, score: 87 },
+];
+
+const MOCK_SQUADS = [
+  { members: [{name: "Aisha Sharma"}, {name: "Alex Rivera"}, {name: "Neha Gupta"}], compatibilityScore: 94 },
+  { members: [{name: "Rishi Singh"}, {name: "Sarah Chen"}], compatibilityScore: 91 },
+];
 
 export default function HackathonMode() {
   const [hackathonId, setHackathonId] = useState("CU-HACK-2026");
@@ -90,6 +104,10 @@ export default function HackathonMode() {
     }
   };
 
+  const displayLeaderboard = leaderboard.length > 0 ? leaderboard : MOCK_LEADERBOARD;
+  const displayTeams = suggestedTeams.length > 0 ? suggestedTeams : MOCK_SQUADS;
+  const isMock = leaderboard.length === 0;
+
   return (
     <div className="min-h-screen bg-[var(--background)] p-6">
       
@@ -136,20 +154,20 @@ export default function HackathonMode() {
            </div>
            
            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-4">
-              {leaderboard.length > 0 ? leaderboard.map((pair, idx) => (
-                <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} transition={{delay: idx*0.05}} key={idx} className="bg-white border border-[#f0e6e4]/60 p-5 rounded-2xl flex items-center justify-between hover:border-[#f9ae9b]/40 hover:shadow-lg hover:shadow-[#f9ae9b]/5 transition-all group">
+              {displayLeaderboard.map((pair, idx) => (
+                <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} transition={{delay: idx*0.05}} key={idx} className={`bg-white border border-[#f0e6e4]/60 p-5 rounded-2xl flex items-center justify-between transition-all group ${isMock ? 'opacity-70' : 'hover:border-[#f9ae9b]/40 hover:shadow-lg hover:shadow-[#f9ae9b]/5'}`}>
                    <div className="flex items-center gap-6">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${idx < 3 ? 'bg-[#fcefec] text-[#f9ae9b] border border-[#f9ae9b]/20 shadow-inner' : 'bg-gray-50 text-gray-300 border border-gray-100'}`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm ${idx < 3 && !isMock ? 'bg-[#fcefec] text-[#f9ae9b] border border-[#f9ae9b]/20 shadow-inner' : 'bg-gray-50 text-gray-300 border border-gray-100'}`}>
                          {idx+1}
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="font-bold text-[#222] text-[15px]">{pair.user1.name}</p>
-                          <span className="text-[#f9ae9b] opacity-40 text-xs">🤝</span>
-                          <p className="font-bold text-[#222] text-[15px]">{pair.user2.name}</p>
+                          <p className={`font-bold text-[15px] ${isMock ? 'text-gray-500' : 'text-[#222]'}`}>{pair.user1.name}</p>
+                          <span className={`${isMock ? 'text-gray-300' : 'text-[#f9ae9b] opacity-40'} text-xs`}>🤝</span>
+                          <p className={`font-bold text-[15px] ${isMock ? 'text-gray-500' : 'text-[#222]'}`}>{pair.user2.name}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">High Synergy Affinity</span>
+                          <span className={`text-[10px] font-bold uppercase tracking-wider ${isMock ? 'text-gray-300' : 'text-gray-400'}`}>High Synergy Affinity</span>
                           <span className="w-1 h-1 rounded-full bg-gray-200"></span>
                           <span className="text-[10px] text-gray-400 italic">Matched {pair.user1.skills.length + pair.user2.skills.length} vectors</span>
                         </div>
@@ -157,22 +175,15 @@ export default function HackathonMode() {
                    </div>
                    <div className="text-right flex flex-col items-end">
                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold font-display text-[#f9ae9b]">{pair.score}</span>
-                        <span className="text-xs font-bold text-[#f9ae9b]/60">%</span>
+                        <span className={`text-2xl font-bold font-display ${isMock ? 'text-gray-400' : 'text-[#f9ae9b]'}`}>{pair.score}</span>
+                        <span className={`text-xs font-bold ${isMock ? 'text-gray-300' : 'text-[#f9ae9b]/60'}`}>%</span>
                      </div>
                      <div className="w-12 h-1 bg-gray-100 rounded-full mt-1 overflow-hidden">
-                        <motion.div initial={{width:0}} animate={{width:`${pair.score}%`}} className="h-full bg-[#f9ae9b]"></motion.div>
+                        <motion.div initial={{width:0}} animate={{width:`${pair.score}%`}} className={`h-full ${isMock ? 'bg-gray-300' : 'bg-[#f9ae9b]'}`}></motion.div>
                      </div>
                    </div>
                 </motion.div>
-              )) : (
-                <div className="h-full flex flex-col items-center justify-center text-gray-300">
-                  <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                     <span className="text-4xl opacity-30">📊</span>
-                  </div>
-                  <p className="text-sm font-medium">Matrix awaiting participant expansion</p>
-                </div>
-              )}
+              ))}
            </div>
         </div>
 
@@ -185,34 +196,26 @@ export default function HackathonMode() {
            </div>
            
            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 grid grid-cols-1 gap-5">
-              {suggestedTeams.length > 0 ? suggestedTeams.map((team, idx) => (
-                <motion.div initial={{opacity:0, scale:0.98}} animate={{opacity:1, scale:1}} transition={{delay: idx*0.1}} key={idx} className="bg-gradient-to-br from-[#fcefec] to-white border border-[#f9ae9b]/15 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+              {displayTeams.map((team, idx) => (
+                <motion.div initial={{opacity:0, scale:0.98}} animate={{opacity:1, scale:1}} transition={{delay: idx*0.1}} key={idx} className={`border p-6 rounded-2xl shadow-sm transition-shadow ${isMock ? 'bg-white border-gray-100 opacity-70' : 'bg-gradient-to-br from-[#fcefec] to-white border-[#f9ae9b]/15 hover:shadow-md'}`}>
                   <div className="flex justify-between items-center mb-5">
-                    <h3 className={`${playfair.className} text-xl font-bold text-[#222]`}>Squad Ensemble-{idx+1}</h3>
+                    <h3 className={`${playfair.className} text-xl font-bold ${isMock ? 'text-gray-500' : 'text-[#222]'}`}>Squad Ensemble-{idx+1}</h3>
                     <div className="flex items-center gap-2">
-                       <div className="bg-white px-3 py-1.5 rounded-full border border-[#f9ae9b]/20 shadow-sm">
-                          <span className="text-[11px] font-bold text-[#f9ae9b] tracking-widest">{team.compatibilityScore}% SYNC</span>
+                       <div className={`px-3 py-1.5 rounded-full border shadow-sm ${isMock ? 'bg-gray-50 border-gray-100' : 'bg-white border-[#f9ae9b]/20'}`}>
+                          <span className={`text-[11px] font-bold tracking-widest ${isMock ? 'text-gray-400' : 'text-[#f9ae9b]'}`}>{team.compatibilityScore}% SYNC</span>
                        </div>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2.5">
                     {team.members.map((m, i) => (
-                      <div key={i} className="flex items-center gap-2.5 bg-white px-4 py-2 rounded-xl border border-gray-100 shadow-sm group hover:border-[#f9ae9b]/30 transition-colors">
-                        <div className="w-6 h-6 rounded-lg bg-gray-50 flex items-center justify-center text-[10px] text-[#f9ae9b] font-bold border border-gray-100 group-hover:bg-[#f9ae9b] group-hover:text-white transition-colors">{m.name.charAt(0)}</div>
-                        <span className="text-[13px] font-medium text-[#444]">{m.name}</span>
+                      <div key={i} className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border border-gray-100 shadow-sm ${isMock ? 'bg-gray-50' : 'bg-white hover:border-[#f9ae9b]/30 transition-colors group'}`}>
+                        <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-bold border ${isMock ? 'bg-white text-gray-400 border-gray-200' : 'bg-gray-50 text-[#f9ae9b] border-gray-100 group-hover:bg-[#f9ae9b] group-hover:text-white transition-colors'}`}>{m.name.charAt(0)}</div>
+                        <span className={`text-[13px] font-medium ${isMock ? 'text-gray-500' : 'text-[#444]'}`}>{m.name}</span>
                       </div>
                     ))}
                   </div>
                 </motion.div>
-              )) : (
-                <div className="h-full flex flex-col items-center justify-center text-gray-300">
-                  <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
-                     <span className="text-4xl opacity-30">🤖</span>
-                  </div>
-                  <p className="text-sm font-medium">Pool expansion in progress...</p>
-                  <p className="text-[10px] mt-1 font-medium italic">Ensemble clustering requires 3+ participants</p>
-                </div>
-              )}
+              ))}
            </div>
         </div>
 

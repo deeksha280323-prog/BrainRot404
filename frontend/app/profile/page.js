@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import ProfileImageUpload from "../components/ProfileImageUpload";
 import { Playfair_Display } from "next/font/google";
+import { getMe, updateProfile } from "../../lib/api";
+import { useRightPanel } from "../contexts/RightPanelContext";
 
 const playfair = Playfair_Display({ subsets: ["latin"] });
 

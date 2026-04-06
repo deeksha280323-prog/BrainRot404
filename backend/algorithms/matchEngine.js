@@ -23,9 +23,16 @@ const findMatches = async (userId, filters = {}) => {
     // 2. Fetch potential matches (exclude self, already swiped, not onboarded)
     const query = {
       _id: { $nin: swipedUserIds },
-      onboardingCompleted: true,
-      ...filters
+      onboardingCompleted: true
     };
+
+    if (filters.state) {
+      query.state = { $regex: new RegExp(filters.state, 'i') };
+    }
+    if (filters.country) {
+      query.country = { $regex: new RegExp(filters.country, 'i') };
+    }
+
     const potentialMatches = await User.find(query).select('-passwordHash -swipedRight -swipedLeft -matches');
 
     // 3. Create vector for source user

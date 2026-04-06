@@ -35,24 +35,31 @@ const recordSwipe = async (req, res) => {
     }
 
     const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
     
-    if (action === 'right') {
-       if (!user.swipedRight.includes(targetUserId)) {
+    // Check if already swiped to avoid duplicates
+    const alreadySwipedRight = user.swipedRight.some(id => id.toString() === targetUserId);
+    const alreadySwipedLeft = user.swipedLeft.some(id => id.toString() === targetUserId);
+
+    if (action === 'right' || action === 'super') {
+       if (!alreadySwipedRight) {
            user.swipedRight.push(targetUserId);
-           // In a full system, you would check if the target swiped right too
-           // and if so, create a 'Match' record/notification.
+           // Remove from left if it was there (merging features)
+           user.swipedLeft = user.swipedLeft.filter(id => id.toString() !== targetUserId);
        }
     } else if (action === 'left') {
-        if (!user.swipedLeft.includes(targetUserId)) {
+        if (!alreadySwipedLeft) {
            user.swipedLeft.push(targetUserId);
+           // Remove from right if it was there
+           user.swipedRight = user.swipedRight.filter(id => id.toString() !== targetUserId);
         }
     }
 
     await user.save();
-    res.json({ message: 'Swipe recorded successfully' });
+    res.json({ message: 'Swipe recorded successfully', action });
 
   } catch (error) {
-    console.error(error);
+    console.error('Error recording swipe:', error);
     res.status(500).json({ message: 'Error recording swipe' });
   }
 };
@@ -78,8 +85,41 @@ const demoCompare = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Get detailed lists of swiped profiles (accepted and rejected)
+ * @route   GET /api/matches/swiped
+ * @access  Private
+ */
+const getSwipedProfiles = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const acceptedUsers = await User.find({ _id: { $in: user.swipedRight } }).select('-passwordHash');
+    const rejectedUsers = await User.find({ _id: { $in: user.swipedLeft } }).select('-passwordHash');
+
+    // Calculate scores again for consistency in grid visualization
+    const v1 = createUserVector(user.skills);
+    
+    const formatUser = (u) => {
+      const v2 = createUserVector(u.skills);
+      const score = calculateCosineSimilarity(v1, v2);
+      return { user: u, matchScore: score };
+    };
+
+    res.json({
+      accepted: acceptedUsers.map(formatUser),
+      rejected: rejectedUsers.map(formatUser)
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching swiped profiles' });
+  }
+};
+
 module.exports = {
   getMatches,
   recordSwipe,
-  demoCompare
+  demoCompare,
+  getSwipedProfiles
 };

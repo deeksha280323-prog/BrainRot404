@@ -4,6 +4,24 @@ import { useRouter } from "next/navigation";
 import { getMe, getMatches } from "../../lib/api";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Playfair_Display } from "next/font/google";
+
+const playfair = Playfair_Display({ subsets: ["latin"] });
+
+const MOCK_MATCHES = [
+  {
+    user: { _id: "m1", name: "Aisha Sharma", experienceLevel: { overall: "Expert" }, bio: "Full-stack architect specializing in clean aesthetics." },
+    matchScore: 98
+  },
+  {
+    user: { _id: "m2", name: "Alex Rivera", experienceLevel: { overall: "Advanced" }, bio: "Frontend maestro. If it doesn't run at 60fps, it's broken." },
+    matchScore: 92
+  },
+  {
+    user: { _id: "m3", name: "Rishi Singh", experienceLevel: { overall: "Expert" }, bio: "AI and Systems programming aficionado. Exploring Rust." },
+    matchScore: 89
+  }
+];
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -121,13 +139,43 @@ export default function DashboardPage() {
                   </button>
                 </div>
               </motion.div>
-            )) : (
-              <div className="bg-[#fbfbfb] border border-dashed border-[#eee] p-12 rounded-[2.5rem] text-center">
-                <span className="text-4xl opacity-20 block mb-4">✨</span>
-                <p className="text-gray-400 text-sm font-medium italic">Your vector pairings are being computed...</p>
-              </div>
-            )}
+            )) : MOCK_MATCHES.map((match, i) => (
+              <motion.div 
+                key={match.user._id}
+                initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
+                className="bg-white border border-[#f0e6e4]/60 p-6 rounded-3xl flex items-center justify-between opacity-70 hover:opacity-100 transition-all group relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 px-3 py-1 bg-gray-100 text-[8px] font-bold uppercase tracking-widest text-gray-400 rounded-bl-xl z-10">Demo Data</div>
+                <div className="flex items-center gap-6">
+                  <div className="w-14 h-14 flex-shrink-0 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 font-bold text-xl border border-gray-100">
+                    {match.user?.name?.charAt(0)}
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-500 text-lg mb-1">{match.user?.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{match.user?.experienceLevel?.overall || "Developer"}</span>
+                      <span className="w-1 h-1 rounded-full bg-gray-200"></span>
+                      <p className="text-xs text-gray-400 truncate max-w-[200px] font-medium">{match.user?.bio}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-8">
+                  <div className="text-right hidden sm:block grayscale">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold font-display text-gray-400">{match.matchScore}</span>
+                      <span className="text-[10px] font-bold text-gray-300">%</span>
+                    </div>
+                    <p className="text-[9px] text-gray-400 uppercase font-bold tracking-[0.15em] mt-1">Similarity</p>
+                  </div>
+                  <button disabled className="w-10 h-10 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center opacity-50 cursor-not-allowed">
+                    💬
+                  </button>
+                </div>
+              </motion.div>
+            ))}
           </div>
+
         </div>
 
         {/* Right Col: Quick Stats & Radar */}

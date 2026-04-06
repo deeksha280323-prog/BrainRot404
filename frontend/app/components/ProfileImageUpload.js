@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { uploadProfilePicture } from "../lib/api";
+import { uploadProfilePicture } from "../../lib/api";
 import { motion } from "framer-motion";
 
 export default function ProfileImageUpload({ initialImage, onUploadSuccess }) {

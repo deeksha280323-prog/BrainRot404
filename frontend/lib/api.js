@@ -32,6 +32,7 @@ export const uploadProfilePicture = (formData) => API.put('/users/profile/pictur
 export const getMatches = (params) => API.get('/matches', { params });
 export const recordSwipe = (data) => API.post('/matches/swipe', data);
 export const demoCompare = (data) => API.post('/matches/demo-compare', data);
+export const getSwipedProfiles = () => API.get('/matches/swiped');
 
 // Teams
 export const getTeams = () => API.get('/teams');
